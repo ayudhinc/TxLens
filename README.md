@@ -1,3 +1,8 @@
+```
+▀█▀ ▀▄▀ █░░ █▀▀ █▄░█ █▀
+░█░ █░█ █▄▄ ██▄ █░▀█ ▄█
+```
+
 # TxLens
 
 A command-line tool that decodes and explains Solana transactions in human-readable format.
