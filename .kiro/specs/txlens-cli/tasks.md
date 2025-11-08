@@ -66,27 +66,27 @@
   - Pass instructions to InstructionDecoder for detailed decoding
   - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5_
 
-- [ ] 5. Implement instruction decoders
+- [x] 5. Implement instruction decoders
   - _Requirements: 4.3, 4.4, 4.5_
 
-- [ ] 5.1 Create InstructionDecoder interface and base implementation
+- [x] 5.1 Create InstructionDecoder interface and base implementation
   - Define InstructionDecoder interface with canDecode and decode methods
   - Create DecodedInstruction interface for decoder output
   - _Requirements: 4.3, 4.5_
 
-- [ ] 5.2 Implement TokenProgramDecoder
+- [x] 5.2 Implement TokenProgramDecoder
   - Implement canDecode to identify Token Program instructions
   - Decode Transfer, TransferChecked, MintTo, Burn instructions
   - Extract token amounts, source, and destination accounts
   - _Requirements: 3.4, 4.3, 4.4_
 
-- [ ] 5.3 Implement SystemProgramDecoder
+- [x] 5.3 Implement SystemProgramDecoder
   - Implement canDecode to identify System Program instructions
   - Decode Transfer, CreateAccount, Allocate instructions
   - Extract relevant parameters from instruction data
   - _Requirements: 4.3, 4.4, 4.5_
 
-- [ ] 5.4 Create decoder registry in TransactionParser
+- [x] 5.4 Create decoder registry in TransactionParser
   - Register TokenProgramDecoder and SystemProgramDecoder
   - Implement fallback for unknown program instructions
   - _Requirements: 4.3, 4.5_
