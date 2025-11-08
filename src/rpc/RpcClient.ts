@@ -63,8 +63,11 @@ export class RpcClient {
     const { slot, blockTime, transaction, meta } = response;
 
     // Extract account keys - handle both versioned and legacy transactions
-    const accountKeys = transaction.message.getAccountKeys().keySegments().flat();
-    const accountKeysArray = accountKeys.map((key) => key.toBase58());
+    // For versioned transactions with address lookup tables, we need the loaded addresses from meta
+    const accountKeys = transaction.message.getAccountKeys({
+      accountKeysFromLookups: meta?.loadedAddresses,
+    });
+    const accountKeysArray = accountKeys.keySegments().flat().map((key) => key.toBase58());
 
     // Extract instructions
     const instructions = transaction.message.compiledInstructions.map((ix) => ({
