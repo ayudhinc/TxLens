@@ -8,20 +8,20 @@
   - Create src directory structure: cli, controller, rpc, parser, formatter, utils
   - _Requirements: All requirements depend on proper project setup_
 
-- [ ] 2. Implement utility modules
+- [x] 2. Implement utility modules
   - _Requirements: 1.1, 2.2, 3.2, 6.4, 7.1_
 
-- [ ] 2.1 Create address formatter utility
+- [x] 2.1 Create address formatter utility
   - Implement shortenAddress function to display first 4 and last 4 characters
   - Implement isValidSignature function to validate base58 format and length
   - _Requirements: 1.2, 2.2_
 
-- [ ] 2.2 Create amount formatter utility
+- [x] 2.2 Create amount formatter utility
   - Implement lamportsToSol function with proper decimal conversion
   - Implement formatTokenAmount function with configurable decimals
   - _Requirements: 2.3, 3.2, 5.3, 5.4_
 
-- [ ] 2.3 Create known programs registry
+- [x] 2.3 Create known programs registry
   - Define KNOWN_PROGRAMS constant with Token Program, System Program, and common program IDs
   - Implement getProgramName function to lookup program names
   - _Requirements: 4.2_
