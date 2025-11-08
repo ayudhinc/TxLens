@@ -116,10 +116,10 @@
   - Handle serialization errors
   - _Requirements: 7.1, 7.2, 7.3, 7.4, 7.5_
 
-- [ ] 7. Implement transaction controller
+- [x] 7. Implement transaction controller
   - _Requirements: All requirements flow through controller_
 
-- [ ] 7.1 Create TransactionController class
+- [x] 7.1 Create TransactionController class
   - Implement constructor accepting RpcClient, TransactionParser, and OutputFormatter
   - Implement processTransaction method to orchestrate the pipeline
   - Fetch transaction using RpcClient
