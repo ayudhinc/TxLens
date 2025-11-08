@@ -26,10 +26,10 @@
   - Implement getProgramName function to lookup program names
   - _Requirements: 4.2_
 
-- [ ] 3. Implement RPC client layer
+- [x] 3. Implement RPC client layer
   - _Requirements: 1.1, 1.3, 6.1, 6.2, 6.3, 6.5_
 
-- [ ] 3.1 Create RpcClient class
+- [x] 3.1 Create RpcClient class
   - Implement constructor accepting RPC endpoint URL
   - Implement getTransaction method using @solana/web3.js Connection
   - Configure getTransaction to use maxSupportedTransactionVersion
@@ -37,7 +37,7 @@
   - Add error handling for network failures and invalid responses
   - _Requirements: 1.1, 1.3, 6.1, 6.2, 6.3, 6.5_
 
-- [ ] 3.2 Define RawTransaction interface
+- [x] 3.2 Define RawTransaction interface
   - Create TypeScript interface matching Solana RPC transaction response structure
   - Include slot, blockTime, transaction message, signatures, and meta fields
   - _Requirements: 1.1, 5.5, 9.1_
