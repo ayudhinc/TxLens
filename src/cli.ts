@@ -15,8 +15,15 @@ import {
   getRandomTransaction,
   INTERESTING_ADDRESSES,
 } from './utils/transactionFinder';
+import {
+  scoreTransactions,
+  filterByScore,
+  filterByTags,
+  ScoredTransaction,
+} from './utils/interestingRules';
 import { Connection } from '@solana/web3.js';
 import { displayLogo } from './utils/logo';
+import chalk from 'chalk';
 
 const DEFAULT_RPC_ENDPOINT = 'https://api.mainnet-beta.solana.com';
 
@@ -119,10 +126,13 @@ async function main() {
     .option('--rpc <url>', 'Custom RPC endpoint URL', DEFAULT_RPC_ENDPOINT)
     .option('--address <address>', 'Specific address to query')
     .option('--program <name>', 'Known program name (jupiter, orca, raydium, solend, token)')
-    .option('--limit <number>', 'Number of transactions to fetch', '10')
+    .option('--limit <number>', 'Number of transactions to fetch', '20')
+    .option('--min-score <number>', 'Minimum interest score (default: 5)', '5')
+    .option('--tag <tags...>', 'Filter by specific tags (whale_move, new_token, nft_mint, defi, etc)')
     .option('--successful', 'Only show successful transactions', false)
     .option('--failed', 'Only show failed transactions', false)
     .option('--random', 'Pick a random transaction and decode it', false)
+    .option('--decode-top', 'Decode the most interesting transaction', false)
     .option('--json', 'Output in JSON format', false)
     .action(async (options: any) => {
       try {
@@ -164,7 +174,7 @@ async function main() {
           process.exit(0);
         }
 
-        // Filter based on criteria
+        // Filter based on basic criteria
         const filtered = filterInterestingTransactions(transactions, {
           onlySuccessful: options.successful,
           onlyFailed: options.failed,
@@ -175,44 +185,104 @@ async function main() {
           process.exit(0);
         }
 
-        // If random flag is set, pick one and decode it
-        if (options.random) {
-          const randomTx = getRandomTransaction(filtered);
-          if (!randomTx) {
-            console.log('No transactions available.');
-            process.exit(0);
+        console.log(`Analyzing ${filtered.length} transactions...\n`);
+
+        // Parse and score all transactions
+        const rpcClient = new RpcClient(rpcEndpoint);
+        const decoders = [new TokenProgramDecoder(), new SystemProgramDecoder()];
+        const parser = new TransactionParser(decoders);
+
+        const parsedTransactions = [];
+        for (const txInfo of filtered) {
+          try {
+            const rawTx = await rpcClient.getTransaction(txInfo.signature);
+            const parsed = parser.parse(rawTx);
+            parsedTransactions.push(parsed);
+          } catch (error) {
+            // Skip transactions that fail to parse
+            continue;
           }
+        }
 
-          console.log(`Selected random transaction: ${randomTx.signature}\n`);
+        // Score transactions
+        let scored = scoreTransactions(parsedTransactions);
 
-          // Decode the transaction
-          const rpcClient = new RpcClient(rpcEndpoint);
-          const decoders = [new TokenProgramDecoder(), new SystemProgramDecoder()];
-          const parser = new TransactionParser(decoders);
+        // Apply filters
+        const minScore = parseInt(options.minScore, 10);
+        scored = filterByScore(scored, minScore);
+
+        if (options.tag && options.tag.length > 0) {
+          scored = filterByTags(scored, options.tag);
+        }
+
+        if (scored.length === 0) {
+          console.log('No interesting transactions found matching criteria.');
+          console.log('Try lowering --min-score or removing tag filters.');
+          process.exit(0);
+        }
+
+        // If decode-top flag is set, decode the most interesting transaction
+        if (options.decodeTop) {
+          const top = scored[0];
+          console.log(chalk.bold(`\nMost Interesting Transaction (Score: ${top.totalScore}):`));
+          console.log(chalk.dim(`Tags: ${top.tags.join(', ')}`));
+          console.log(chalk.dim(`Reasons: ${top.reasons.join(', ')}\n`));
+
           const formatter = options.json
             ? new JsonFormatter()
             : new HumanReadableFormatter();
           const controller = new TransactionController(rpcClient, parser, formatter);
 
-          const output = await controller.processTransaction(randomTx.signature);
+          const output = await controller.processTransaction(top.transaction.signature);
           console.log(output);
+          process.exit(0);
+        }
+
+        // If random flag is set, pick one and decode it
+        if (options.random) {
+          const randomIndex = Math.floor(Math.random() * scored.length);
+          const randomTx = scored[randomIndex];
+
+          console.log(chalk.bold(`\nRandom Transaction (Score: ${randomTx.totalScore}):`));
+          console.log(chalk.dim(`Tags: ${randomTx.tags.join(', ')}`));
+          console.log(chalk.dim(`Reasons: ${randomTx.reasons.join(', ')}\n`));
+
+          const formatter = options.json
+            ? new JsonFormatter()
+            : new HumanReadableFormatter();
+          const controller = new TransactionController(rpcClient, parser, formatter);
+
+          const output = await controller.processTransaction(randomTx.transaction.signature);
+          console.log(output);
+          process.exit(0);
+        }
+
+        // List scored transactions
+        if (options.json) {
+          console.log(JSON.stringify(scored, null, 2));
         } else {
-          // List transactions
-          console.log(`Found ${filtered.length} transaction(s):\n`);
-          filtered.forEach((tx, index) => {
-            const status = tx.err ? '✗ Failed' : '✓ Success';
-            const time = tx.blockTime
-              ? new Date(tx.blockTime * 1000).toISOString()
-              : 'Unknown';
-            console.log(`${index + 1}. ${tx.signature}`);
-            console.log(`   Status: ${status}`);
-            console.log(`   Time: ${time}`);
-            console.log(`   Slot: ${tx.slot}`);
+          console.log(chalk.bold(`Found ${scored.length} interesting transaction(s):\n`));
+
+          scored.slice(0, 10).forEach((s, index) => {
+            const tx = s.transaction;
+            const status = tx.status === 'success' ? chalk.green('✓ Success') : chalk.red('✗ Failed');
+            const time = tx.blockTime ? tx.blockTime.toISOString() : 'Unknown';
+
+            console.log(chalk.bold(`${index + 1}. ${tx.signature}`));
+            console.log(`   Score: ${chalk.yellow(s.totalScore.toString())} | Tags: ${chalk.cyan(s.tags.join(', '))}`);
+            console.log(`   ${s.reasons.join(' | ')}`);
+            console.log(`   Status: ${status} | Time: ${time}`);
             console.log();
           });
 
-          console.log(`\nTo decode a transaction, run:`);
-          console.log(`  txlens decode <signature>`);
+          if (scored.length > 10) {
+            console.log(chalk.dim(`... and ${scored.length - 10} more\n`));
+          }
+
+          console.log(chalk.dim(`\nTo decode a transaction, run:`));
+          console.log(chalk.dim(`  txlens decode <signature>`));
+          console.log(chalk.dim(`\nTo decode the most interesting transaction:`));
+          console.log(chalk.dim(`  txlens find --decode-top`));
         }
 
         process.exit(0);
