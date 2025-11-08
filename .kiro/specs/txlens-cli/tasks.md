@@ -42,15 +42,15 @@
   - Include slot, blockTime, transaction message, signatures, and meta fields
   - _Requirements: 1.1, 5.5, 9.1_
 
-- [ ] 4. Implement transaction parser
+- [x] 4. Implement transaction parser
   - _Requirements: 1.4, 1.5, 2.1, 2.2, 2.3, 2.4, 2.5, 3.1, 3.2, 3.3, 3.4, 4.1, 4.2, 4.3, 4.4, 5.1, 5.2, 5.3, 9.1, 9.2, 9.3, 9.4, 9.5_
 
-- [ ] 4.1 Define ParsedTransaction and related interfaces
+- [x] 4.1 Define ParsedTransaction and related interfaces
   - Create ParsedTransaction interface with all output fields
   - Define AccountChange, TokenTransfer, and ProgramInteraction interfaces
   - _Requirements: 1.4, 2.1, 3.1, 4.1, 5.1_
 
-- [ ] 4.2 Implement TransactionParser class
+- [x] 4.2 Implement TransactionParser class
   - Implement parse method to transform RawTransaction to ParsedTransaction
   - Extract transaction signature, status, slot, and blockTime
   - Calculate account balance changes from preBalances and postBalances
@@ -60,7 +60,7 @@
   - Handle null/missing fields gracefully
   - _Requirements: 1.4, 1.5, 2.1, 2.2, 2.3, 2.4, 2.5, 3.1, 3.2, 3.3, 3.4, 5.1, 5.2, 5.3, 9.1, 9.2, 9.3, 9.4, 9.5_
 
-- [ ] 4.3 Implement instruction parsing in TransactionParser
+- [x] 4.3 Implement instruction parsing in TransactionParser
   - Extract program interactions from transaction instructions
   - Map program IDs to known program names
   - Pass instructions to InstructionDecoder for detailed decoding
