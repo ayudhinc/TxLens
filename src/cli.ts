@@ -16,6 +16,7 @@ import {
   INTERESTING_ADDRESSES,
 } from './utils/transactionFinder';
 import { Connection } from '@solana/web3.js';
+import { displayLogo } from './utils/logo';
 
 const DEFAULT_RPC_ENDPOINT = 'https://api.mainnet-beta.solana.com';
 
@@ -29,6 +30,12 @@ interface CLIOptions {
  */
 async function main() {
   const program = new Command();
+
+  // Display logo when running without arguments or with help
+  const args = process.argv.slice(2);
+  if (args.length === 0 || args.includes('--help') || args.includes('-h')) {
+    displayLogo();
+  }
 
   program
     .name('txlens')
