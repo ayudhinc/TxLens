@@ -91,14 +91,14 @@
   - Implement fallback for unknown program instructions
   - _Requirements: 4.3, 4.5_
 
-- [ ] 6. Implement output formatters
+- [x] 6. Implement output formatters
   - _Requirements: 7.1, 7.2, 7.3, 7.4, 8.1, 8.2, 8.3, 8.4, 8.5_
 
-- [ ] 6.1 Create OutputFormatter interface
+- [x] 6.1 Create OutputFormatter interface
   - Define format method signature
   - _Requirements: 7.1, 7.2_
 
-- [ ] 6.2 Implement HumanReadableFormatter
+- [x] 6.2 Implement HumanReadableFormatter
   - Implement format method to create structured text output
   - Display transaction signature, status, block, and timestamp sections
   - Format account changes with shortened addresses and SOL amounts
@@ -109,7 +109,7 @@
   - Detect terminal color support and disable colors when not supported
   - _Requirements: 1.4, 1.5, 2.2, 2.3, 2.4, 3.2, 3.3, 4.2, 4.3, 5.1, 5.2, 5.4, 8.1, 8.2, 8.3, 8.4, 8.5, 9.2, 9.3_
 
-- [ ] 6.3 Implement JsonFormatter
+- [x] 6.3 Implement JsonFormatter
   - Implement format method to serialize ParsedTransaction to JSON
   - Use JSON.stringify with pretty printing
   - Ensure all fields are included without color codes
