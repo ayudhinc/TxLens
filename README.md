@@ -20,6 +20,8 @@ TxLens helps developers understand what's happening in Solana transactions by br
 - ⚡ **Compute & Fees** - Show compute units consumed and transaction fees
 - 🎨 **Color-Coded Output** - Better readability with terminal colors
 - 🔎 **Transaction Discovery** - Find interesting transactions from popular programs
+- � ***Smart Scoring System** - Pluggable rules engine to identify interesting transactions
+- 🏷️ **Tag-Based Filtering** - Filter by whale moves, new tokens, NFT mints, DeFi, and more
 - 🌐 **Custom RPC Support** - Use any Solana RPC endpoint
 - 📄 **JSON Output** - Machine-readable format for integration with other tools
 - 🔗 **Versioned Transactions** - Full support for address lookup tables
@@ -70,24 +72,51 @@ txlens decode <transaction-signature> --json
 
 ### Find Interesting Transactions
 
+The `find` command uses a smart scoring system to identify interesting transactions based on multiple criteria.
+
 ```bash
 # Find recent transactions from Jupiter aggregator
-txlens find --program jupiter --limit 5
+txlens find --program jupiter --limit 10
 
 # Find transactions from a specific address
 txlens find --address <solana-address> --limit 10
 
+# Find only high-scoring transactions (minimum score of 10)
+txlens find --program token --min-score 10
+
+# Filter by specific tags
+txlens find --program jupiter --tag whale_move defi
+
+# Decode the most interesting transaction automatically
+txlens find --program orca --decode-top
+
+# Pick a random interesting transaction and decode it
+txlens find --program token --random
+
 # Find only successful transactions
 txlens find --program orca --successful
 
-# Find only failed transactions
+# Find only failed transactions (potential bugs/attacks)
 txlens find --program raydium --failed
-
-# Pick a random transaction and decode it automatically
-txlens find --program token --random
 
 # Available programs: jupiter, orca, raydium, solend, token
 ```
+
+#### Interest Scoring System
+
+Transactions are automatically scored based on these criteria:
+
+- **Whale Moves** (score: 4-10) - Large SOL movements (>10, >50, >100 SOL)
+- **New Tokens** (score: 8) - Token mint creation
+- **NFT Mints** (score: 6) - NFT creation (0 decimals)
+- **High Compute** (score: 5-7) - Complex transactions (>1M compute units or >80% usage)
+- **High Fees** (score: 6) - Expensive transactions (>0.01 SOL)
+- **DeFi Interactions** (score: 5) - Jupiter, Orca, Raydium, Solend, Serum
+- **Multi-Token Transfers** (score: 3-6) - Transactions with many token movements
+- **Complex Multi-Program** (score: 4-7) - Transactions using many programs
+- **Failed Transactions** (score: 5) - Potential attacks or bugs
+
+Tags: `whale_move`, `large_move`, `medium_move`, `new_token`, `nft_mint`, `high_compute`, `compute_intensive`, `high_fee`, `defi`, `token_transfer`, `multi_token`, `complex`, `multi_program`, `failed`
 
 ### Command Options
 
@@ -99,10 +128,13 @@ txlens find --program token --random
 #### `find` command
 - `--program <name>` - Query known program (jupiter, orca, raydium, solend, token)
 - `--address <address>` - Query specific Solana address
-- `--limit <number>` - Number of transactions to fetch (default: 10)
+- `--limit <number>` - Number of transactions to fetch (default: 20)
+- `--min-score <number>` - Minimum interest score threshold (default: 5)
+- `--tag <tags...>` - Filter by specific tags (whale_move, new_token, nft_mint, defi, etc)
 - `--successful` - Only show successful transactions
 - `--failed` - Only show failed transactions
-- `--random` - Pick and decode a random transaction
+- `--decode-top` - Automatically decode the most interesting transaction
+- `--random` - Pick and decode a random interesting transaction
 - `--rpc <url>` - Custom RPC endpoint URL
 - `--json` - Output in JSON format
 
@@ -176,6 +208,19 @@ Compute & Fees:
 }
 ```
 
+### Scored Transaction Output
+
+When using `find` command, transactions are scored and tagged:
+
+```
+Found 1 interesting transaction(s):
+
+1. 2aEvtk7dJoYjrUmLreoUQgrMypxCv6N24bydFhbAxr4Tu5uMwfxpdGa2ntKNSJr6x46JMgaE8PCpHZUeAFXf1XCp
+   Score: 12 | Tags: defi, token_transfer, multi_program
+   Interacts with Raydium CLMM | 3 token transfer(s) | 4 different programs
+   Status: ✓ Success | Time: 2025-11-08T23:21:18.000Z
+```
+
 ## Architecture
 
 TxLens follows a layered architecture:
@@ -203,6 +248,10 @@ Formatter Layer (human-readable or JSON output)
   - HumanReadableFormatter - Color-coded terminal output
   - JsonFormatter - Machine-readable JSON output
 - **TransactionController** - Orchestrates the entire pipeline
+- **InterestingRules** - Pluggable scoring system for transaction discovery
+  - Configurable rules with scores and tags
+  - Aggregates multiple signals into overall interest score
+  - Extensible for custom detection logic
 
 ## Supported Programs
 
@@ -257,22 +306,51 @@ TxLens/
 Contributions are welcome! Here are some ways you can help:
 
 - Add support for more program instruction decoders
+- Create custom interesting transaction rules
 - Improve error messages and handling
 - Add more filtering options for transaction discovery
 - Enhance output formatting
 - Write tests
 - Improve documentation
 
+### Adding Custom Rules
+
+You can easily add custom detection rules to the scoring system:
+
+```typescript
+// In src/utils/interestingRules.ts
+const customRule: InterestingRule = (tx: NormalizedTx) => {
+  // Your custom logic
+  if (tx.totalSolMoved > 1000) {
+    return {
+      score: 15,
+      tag: 'mega_whale',
+      reason: 'Massive SOL movement detected'
+    };
+  }
+  return false;
+};
+
+// Add to DEFAULT_RULES array
+export const DEFAULT_RULES: InterestingRule[] = [
+  customRule,
+  // ... existing rules
+];
+```
+
 Please feel free to submit a Pull Request.
 
 ## Roadmap
 
 - [ ] Add more program decoders (Metaplex, Serum, etc.)
+- [ ] Machine learning-based transaction scoring
+- [ ] Real-time transaction monitoring and alerts
 - [ ] Support for transaction simulation
 - [ ] Interactive mode for exploring transactions
 - [ ] Export to different formats (CSV, HTML)
 - [ ] Transaction comparison tool
 - [ ] Performance metrics and analytics
+- [ ] Custom rule configuration via config file
 
 ## License
 
