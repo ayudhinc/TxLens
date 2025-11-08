@@ -128,10 +128,10 @@
   - Handle and propagate errors with context
   - _Requirements: All requirements_
 
-- [ ] 8. Implement CLI layer
+- [x] 8. Implement CLI layer
   - _Requirements: 1.1, 1.2, 6.1, 6.2, 6.4, 7.1_
 
-- [ ] 8.1 Create CLI argument parser
+- [x] 8.1 Create CLI argument parser
   - Use commander to define CLI interface
   - Accept transaction signature as required positional argument
   - Define --rpc optional flag for custom RPC endpoint
@@ -141,7 +141,7 @@
   - Display usage information for invalid input
   - _Requirements: 1.1, 1.2, 6.1, 6.2, 6.4, 7.1_
 
-- [ ] 8.2 Implement main CLI entry point
+- [x] 8.2 Implement main CLI entry point
   - Parse CLI arguments
   - Set default RPC endpoint if not provided
   - Instantiate RpcClient with endpoint
@@ -154,7 +154,7 @@
   - Exit with appropriate status codes
   - _Requirements: 1.1, 1.2, 1.3, 6.1, 6.2, 6.3, 6.5, 7.1_
 
-- [ ] 8.3 Create executable entry point
+- [x] 8.3 Create executable entry point
   - Create bin/txlens.js shebang script
   - Configure package.json bin field
   - Set up proper file permissions for execution
