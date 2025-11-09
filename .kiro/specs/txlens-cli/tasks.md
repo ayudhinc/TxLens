@@ -160,6 +160,15 @@
   - Set up proper file permissions for execution
   - _Requirements: All requirements_
 
+- [ ] 8.4 Prepare and publish to npm registry
+  - Verify package.json has unique name and correct metadata
+  - Add .npmignore file to exclude source files and tests
+  - Test package locally with npm pack and npm link
+  - Create npm account and authenticate with npm login
+  - Publish package to npm with npm publish
+  - Verify installation works with npm install -g txlens
+  - _Requirements: All requirements_
+
 - [ ] 9. Implement error handling
   - _Requirements: 1.2, 1.3, 6.3, 6.4, 7.5, 9.4_
 
@@ -230,4 +239,14 @@
   - Test end-to-end flow with mock RPC response
   - Test CLI argument parsing and routing
   - Test error propagation through layers
+  - _Requirements: All requirements_
+
+- [ ]* 11.7 Update README with marketing content
+  - Add compelling introduction with problem/solution hook
+  - Include feature highlights with emojis for visual appeal
+  - Add installation and usage examples
+  - Include example output showing the tool in action
+  - Add badges for npm version, downloads, and license
+  - Include contributing guidelines and license information
+  - Add link to GitHub repository
   - _Requirements: All requirements_
