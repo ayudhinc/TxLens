@@ -1,0 +1,49 @@
+# Source files
+src/
+*.ts
+!*.d.ts
+
+# Tests
+test/
+tests/
+*.test.ts
+*.spec.ts
+__tests__/
+
+# Development files
+.kiro/
+.git/
+.gitignore
+tsconfig.json
+pnpm-lock.yaml
+pnpm-workspace.yaml
+
+# Build artifacts
+*.tsbuildinfo
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Documentation (keep README.md)
+docs/
+examples/
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+
+# Environment
+.env
+.env.local
+.env.*.local

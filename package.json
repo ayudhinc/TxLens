@@ -10,7 +10,7 @@
     "build": "tsc",
     "start": "ts-node src/cli.ts",
     "dev": "ts-node src/cli.ts",
-    "preinstall": "npx only-allow pnpm"
+    "prepublishOnly": "pnpm run build"
   },
   "keywords": [
     "solana",
@@ -19,8 +19,16 @@
     "decoder",
     "cli"
   ],
-  "author": "",
+  "author": "TxLens Contributors",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ayudhinc/TxLens.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ayudhinc/TxLens/issues"
+  },
+  "homepage": "https://github.com/ayudhinc/TxLens#readme",
   "dependencies": {
     "@solana/web3.js": "^1.95.8",
     "commander": "^12.1.0",
