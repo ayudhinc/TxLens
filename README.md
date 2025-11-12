@@ -28,11 +28,21 @@ TxLens helps developers understand what's happening in Solana transactions by br
 
 ## Installation
 
+### From npm (Recommended)
+
+```bash
+# Install globally
+npm install -g txlens
+
+# Verify installation
+txlens --version
+```
+
 ### From Source
 
 ```bash
 # Clone the repository
-git clone <repository-url>
+git clone https://github.com/ayudhinc/TxLens.git
 cd TxLens
 
 # Install dependencies
@@ -45,7 +55,7 @@ pnpm run build
 npm link
 ```
 
-### Using the CLI
+### Development
 
 ```bash
 # Run directly with ts-node (development)
