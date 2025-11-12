@@ -1,6 +1,6 @@
 {
   "name": "txlens",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A command-line tool to decode and explain Solana blockchain transactions",
   "main": "dist/index.js",
   "bin": {
