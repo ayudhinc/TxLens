@@ -19,7 +19,7 @@
     "decoder",
     "cli"
   ],
-  "author": "TxLens Contributors",
+  "author": "Dushyant Kashyap <dushyant@ayudh.ai>",
   "license": "MIT",
   "repository": {
     "type": "git",
