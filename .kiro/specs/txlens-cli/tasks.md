@@ -172,7 +172,7 @@
 - [ ] 9. Implement error handling
   - _Requirements: 1.2, 1.3, 6.3, 6.4, 7.5, 9.4_
 
-- [ ] 9.1 Create TxLensError class
+- [x] 9.1 Create TxLensError class
   - Define custom error class with code and details fields
   - Define ErrorCode enum for all error types
   - _Requirements: 1.2, 1.3, 6.3, 6.4, 7.5_
