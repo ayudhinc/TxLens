@@ -24,6 +24,7 @@ import {
 import { Connection } from '@solana/web3.js';
 import { displayLogo } from './utils/logo';
 import { TxLensError, ErrorCode } from './utils/errors';
+import { createErrorFormatter } from './utils/errorFormatter';
 import chalk from 'chalk';
 
 const DEFAULT_RPC_ENDPOINT = 'https://api.mainnet-beta.solana.com';
@@ -31,6 +32,7 @@ const DEFAULT_RPC_ENDPOINT = 'https://api.mainnet-beta.solana.com';
 interface CLIOptions {
   rpc?: string;
   json?: boolean;
+  debug?: boolean;
 }
 
 /**
@@ -57,7 +59,12 @@ async function main() {
     .argument('<signature>', 'Transaction signature to decode')
     .option('--rpc <url>', 'Custom RPC endpoint URL', DEFAULT_RPC_ENDPOINT)
     .option('--json', 'Output in JSON format', false)
+    .option('--debug', 'Enable debug mode with detailed error information', false)
     .action(async (signature: string, options: CLIOptions) => {
+      // Set debug environment variable if flag is provided
+      if (options.debug) {
+        process.env.TXLENS_DEBUG = '1';
+      }
       try {
         // Validate signature format
         if (!isValidSignature(signature)) {
@@ -122,7 +129,12 @@ async function main() {
     .option('--random', 'Pick a random transaction and decode it', false)
     .option('--decode-top', 'Decode the most interesting transaction', false)
     .option('--json', 'Output in JSON format', false)
+    .option('--debug', 'Enable debug mode with detailed error information', false)
     .action(async (options: any) => {
+      // Set debug environment variable if flag is provided
+      if (options.debug) {
+        process.env.TXLENS_DEBUG = '1';
+      }
       try {
         const rpcEndpoint = options.rpc || DEFAULT_RPC_ENDPOINT;
         const connection = new Connection(rpcEndpoint, 'confirmed');
@@ -289,7 +301,12 @@ async function main() {
     .argument('[signature]', 'Transaction signature to decode')
     .option('--rpc <url>', 'Custom RPC endpoint URL', DEFAULT_RPC_ENDPOINT)
     .option('--json', 'Output in JSON format', false)
+    .option('--debug', 'Enable debug mode with detailed error information', false)
     .action(async (signature: string | undefined, options: CLIOptions) => {
+      // Set debug environment variable if flag is provided
+      if (options.debug) {
+        process.env.TXLENS_DEBUG = '1';
+      }
       if (!signature) {
         program.help();
         return;
@@ -351,56 +368,21 @@ async function main() {
  * Handle and display errors with user-friendly messages
  */
 function handleError(error: unknown, signature?: string): never {
-  if (TxLensError.isTxLensError(error)) {
-    // Handle TxLensError with specific messages
-    console.error(chalk.red(`Error [${error.code}]:`), error.message);
+  // Create error formatter with debug mode support
+  const formatter = createErrorFormatter({
+    debug: process.env.DEBUG === 'true' || process.env.TXLENS_DEBUG === '1',
+    useColors: process.stdout.isTTY,
+  });
 
-    // Provide helpful suggestions based on error code
-    switch (error.code) {
-      case ErrorCode.INVALID_SIGNATURE:
-        console.error(chalk.dim('\nTip: Transaction signatures are 88 characters in base58 format'));
-        console.error(chalk.dim('Example: 5VERv8NMvzbJMEkV8xnrLkEaWRtSz9CosKDYjCJjBRnbJLgp8uirBgmQpjKhoR4tjF3ZpRzrFmBV6UjKdiSZkQUW'));
-        break;
+  // Format and display the error
+  const formattedError = formatter.format(error);
+  console.error(formattedError);
 
-      case ErrorCode.INVALID_RPC_URL:
-        console.error(chalk.dim('\nTip: RPC URL must be a valid HTTP/HTTPS URL'));
-        console.error(chalk.dim('Example: https://api.mainnet-beta.solana.com'));
-        break;
-
-      case ErrorCode.RPC_CONNECTION_FAILED:
-        console.error(chalk.dim('\nTip: Check your internet connection and RPC endpoint'));
-        console.error(chalk.dim('Try using a different RPC endpoint with --rpc flag'));
-        break;
-
-      case ErrorCode.TRANSACTION_NOT_FOUND:
-        console.error(chalk.dim('\nTip: Verify the transaction signature is correct'));
-        console.error(chalk.dim('Check the transaction on Solana Explorer: https://explorer.solana.com'));
-        break;
-
-      case ErrorCode.RPC_TIMEOUT:
-        console.error(chalk.dim('\nTip: The RPC endpoint is slow or unresponsive'));
-        console.error(chalk.dim('Try again or use a different RPC endpoint'));
-        break;
-
-      case ErrorCode.RPC_RATE_LIMITED:
-        console.error(chalk.dim('\nTip: You have exceeded the rate limit for this RPC endpoint'));
-        console.error(chalk.dim('Wait a moment and try again, or use a different endpoint'));
-        break;
-
-      case ErrorCode.JSON_SERIALIZATION_FAILED:
-        console.error(chalk.dim('\nTip: Try without --json flag for human-readable output'));
-        break;
-
-      default:
-        // Show details for other errors if available
-        if (error.details) {
-          console.error(chalk.dim('\nDetails:'), JSON.stringify(error.details, null, 2));
-        }
+  // Add context-specific information if available
+  if (signature && TxLensError.isTxLensError(error)) {
+    if (error.code === ErrorCode.TRANSACTION_NOT_FOUND) {
+      console.error(chalk.dim(`\nTransaction: ${signature}`));
     }
-  } else if (error instanceof Error) {
-    console.error(chalk.red('Error:'), error.message);
-  } else {
-    console.error(chalk.red('Error:'), 'An unknown error occurred');
   }
 
   process.exit(1);

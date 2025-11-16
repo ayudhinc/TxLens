@@ -134,6 +134,7 @@ Tags: `whale_move`, `large_move`, `medium_move`, `new_token`, `nft_mint`, `high_
 - `<signature>` - Transaction signature to decode (required)
 - `--rpc <url>` - Custom RPC endpoint URL (default: mainnet)
 - `--json` - Output in JSON format
+- `--debug` - Enable debug mode with detailed error information
 
 #### `find` command
 - `--program <name>` - Query known program (jupiter, orca, raydium, solend, token)
@@ -147,6 +148,72 @@ Tags: `whale_move`, `large_move`, `medium_move`, `new_token`, `nft_mint`, `high_
 - `--random` - Pick and decode a random interesting transaction
 - `--rpc <url>` - Custom RPC endpoint URL
 - `--json` - Output in JSON format
+- `--debug` - Enable debug mode with detailed error information
+
+## Troubleshooting
+
+### Debug Mode
+
+TxLens provides detailed error information in debug mode to help diagnose issues:
+
+```bash
+# Enable debug mode with --debug flag
+txlens decode <signature> --debug
+
+# Or set environment variable
+DEBUG=true txlens decode <signature>
+TXLENS_DEBUG=1 txlens decode <signature>
+```
+
+Debug mode displays:
+- Full error stack traces
+- Detailed error context and parameters
+- Internal error codes
+- Additional diagnostic information
+
+### Common Errors
+
+#### Invalid Signature Format
+```
+Error [INVALID_SIGNATURE]: Invalid transaction signature format
+
+Tip: Transaction signatures are 88 characters in base58 format
+Example: 5VERv8NMvzbJMEkV8xnrLkEaWRtSz9CosKDYjCJjBRnbJLgp8uirBgmQpjKhoR4tjF3ZpRzrFmBV6UjKdiSZkQUW
+```
+
+#### RPC Connection Failed
+```
+Error [RPC_CONNECTION_FAILED]: Failed to connect to RPC endpoint
+
+Tip: Check your internet connection and RPC endpoint
+Try using a different RPC endpoint with --rpc flag
+```
+
+#### Transaction Not Found
+```
+Error [TRANSACTION_NOT_FOUND]: Transaction not found on the blockchain
+
+Tip: Verify the transaction signature is correct
+Check the transaction on Solana Explorer: https://explorer.solana.com
+```
+
+#### Rate Limited
+```
+Error [RPC_RATE_LIMITED]: RPC endpoint rate limit exceeded
+
+Tip: You have exceeded the rate limit for this RPC endpoint
+Wait a moment and try again, or use a different endpoint
+```
+
+### Getting Help
+
+If you encounter issues:
+
+1. **Enable debug mode** to see detailed error information
+2. **Check the error code** and follow the suggested tips
+3. **Try a different RPC endpoint** if you're having connection issues
+4. **Verify the transaction signature** on Solana Explorer
+5. **Open an issue** on GitHub with debug output if the problem persists
 
 ## Example Output
 
