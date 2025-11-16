@@ -2,6 +2,7 @@ import { ParsedTransaction } from '../parser/types';
 import { OutputFormatter } from './OutputFormatter';
 import { shortenAddress } from '../utils/addressFormatter';
 import { lamportsToSol } from '../utils/amountFormatter';
+import { TxLensError, ErrorCode } from '../utils/errors';
 import chalk from 'chalk';
 
 /**
@@ -15,30 +16,41 @@ export class HumanReadableFormatter implements OutputFormatter {
   }
 
   format(transaction: ParsedTransaction): string {
-    const sections: string[] = [];
+    try {
+      const sections: string[] = [];
 
-    // Transaction header
-    sections.push(this.formatHeader(transaction));
+      // Transaction header
+      sections.push(this.formatHeader(transaction));
 
-    // Account changes
-    if (transaction.accountChanges.length > 0) {
-      sections.push(this.formatAccountChanges(transaction));
+      // Account changes
+      if (transaction.accountChanges.length > 0) {
+        sections.push(this.formatAccountChanges(transaction));
+      }
+
+      // Token transfers
+      if (transaction.tokenTransfers.length > 0) {
+        sections.push(this.formatTokenTransfers(transaction));
+      }
+
+      // Program interactions
+      if (transaction.programInteractions.length > 0) {
+        sections.push(this.formatProgramInteractions(transaction));
+      }
+
+      // Compute and fees
+      sections.push(this.formatComputeAndFees(transaction));
+
+      return sections.join('\n\n');
+    } catch (error) {
+      throw new TxLensError(
+        'Failed to format transaction output',
+        ErrorCode.FORMATTING_FAILED,
+        { 
+          signature: transaction.signature,
+          originalError: error instanceof Error ? error.message : String(error)
+        }
+      );
     }
-
-    // Token transfers
-    if (transaction.tokenTransfers.length > 0) {
-      sections.push(this.formatTokenTransfers(transaction));
-    }
-
-    // Program interactions
-    if (transaction.programInteractions.length > 0) {
-      sections.push(this.formatProgramInteractions(transaction));
-    }
-
-    // Compute and fees
-    sections.push(this.formatComputeAndFees(transaction));
-
-    return sections.join('\n\n');
   }
 
   private formatHeader(transaction: ParsedTransaction): string {

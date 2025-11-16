@@ -1,5 +1,6 @@
 import { ParsedTransaction } from '../parser/types';
 import { OutputFormatter } from './OutputFormatter';
+import { TxLensError, ErrorCode } from '../utils/errors';
 
 /**
  * Formats parsed transaction data as JSON
@@ -15,7 +16,14 @@ export class JsonFormatter implements OutputFormatter {
 
       return JSON.stringify(serializable, null, 2);
     } catch (error) {
-      throw new Error(`Failed to serialize transaction to JSON: ${error}`);
+      throw new TxLensError(
+        'Failed to serialize transaction to JSON',
+        ErrorCode.JSON_SERIALIZATION_FAILED,
+        { 
+          signature: transaction.signature,
+          originalError: error instanceof Error ? error.message : String(error)
+        }
+      );
     }
   }
 }

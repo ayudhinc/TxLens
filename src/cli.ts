@@ -23,6 +23,7 @@ import {
 } from './utils/interestingRules';
 import { Connection } from '@solana/web3.js';
 import { displayLogo } from './utils/logo';
+import { TxLensError, ErrorCode } from './utils/errors';
 import chalk from 'chalk';
 
 const DEFAULT_RPC_ENDPOINT = 'https://api.mainnet-beta.solana.com';
@@ -60,9 +61,11 @@ async function main() {
       try {
         // Validate signature format
         if (!isValidSignature(signature)) {
-          console.error('Error: Invalid transaction signature format');
-          console.error('Signature must be 88 characters in base58 format');
-          process.exit(1);
+          throw new TxLensError(
+            'Invalid transaction signature format. Signature must be 88 characters in base58 format',
+            ErrorCode.INVALID_SIGNATURE,
+            { signature }
+          );
         }
 
         // Validate RPC URL format
@@ -70,20 +73,18 @@ async function main() {
         try {
           new URL(rpcEndpoint);
         } catch {
-          console.error('Error: Invalid RPC URL format');
-          process.exit(1);
+          throw new TxLensError(
+            'Invalid RPC URL format',
+            ErrorCode.INVALID_RPC_URL,
+            { url: rpcEndpoint }
+          );
         }
 
-        // Initialize components
+        // Initialize components (RpcClient will validate URL)
         const rpcClient = new RpcClient(rpcEndpoint);
 
         // Validate RPC connection
-        const isConnected = await rpcClient.validateConnection();
-        if (!isConnected) {
-          console.error('Error: Failed to connect to RPC endpoint');
-          console.error(`Endpoint: ${rpcEndpoint}`);
-          process.exit(1);
-        }
+        await rpcClient.validateConnection();
 
         // Create parser with decoders
         const decoders = [new TokenProgramDecoder(), new SystemProgramDecoder()];
@@ -102,20 +103,7 @@ async function main() {
         console.log(output);
         process.exit(0);
       } catch (error) {
-        if (error instanceof Error) {
-          if (error.message.includes('Transaction not found')) {
-            console.error('Error: Transaction not found on the blockchain');
-            console.error(`Signature: ${signature}`);
-          } else if (error.message.includes('Failed to fetch transaction')) {
-            console.error('Error: Failed to fetch transaction from RPC');
-            console.error(error.message);
-          } else {
-            console.error('Error:', error.message);
-          }
-        } else {
-          console.error('Error: An unknown error occurred');
-        }
-        process.exit(1);
+        handleError(error, signature);
       }
     });
 
@@ -310,9 +298,11 @@ async function main() {
       try {
         // Validate signature format
         if (!isValidSignature(signature)) {
-          console.error('Error: Invalid transaction signature format');
-          console.error('Signature must be 88 characters in base58 format');
-          process.exit(1);
+          throw new TxLensError(
+            'Invalid transaction signature format. Signature must be 88 characters in base58 format',
+            ErrorCode.INVALID_SIGNATURE,
+            { signature }
+          );
         }
 
         // Validate RPC URL format
@@ -320,20 +310,18 @@ async function main() {
         try {
           new URL(rpcEndpoint);
         } catch {
-          console.error('Error: Invalid RPC URL format');
-          process.exit(1);
+          throw new TxLensError(
+            'Invalid RPC URL format',
+            ErrorCode.INVALID_RPC_URL,
+            { url: rpcEndpoint }
+          );
         }
 
-        // Initialize components
+        // Initialize components (RpcClient will validate URL)
         const rpcClient = new RpcClient(rpcEndpoint);
 
         // Validate RPC connection
-        const isConnected = await rpcClient.validateConnection();
-        if (!isConnected) {
-          console.error('Error: Failed to connect to RPC endpoint');
-          console.error(`Endpoint: ${rpcEndpoint}`);
-          process.exit(1);
-        }
+        await rpcClient.validateConnection();
 
         // Create parser with decoders
         const decoders = [new TokenProgramDecoder(), new SystemProgramDecoder()];
@@ -352,28 +340,73 @@ async function main() {
         console.log(output);
         process.exit(0);
       } catch (error) {
-        if (error instanceof Error) {
-          if (error.message.includes('Transaction not found')) {
-            console.error('Error: Transaction not found on the blockchain');
-            console.error(`Signature: ${signature}`);
-          } else if (error.message.includes('Failed to fetch transaction')) {
-            console.error('Error: Failed to fetch transaction from RPC');
-            console.error(error.message);
-          } else {
-            console.error('Error:', error.message);
-          }
-        } else {
-          console.error('Error: An unknown error occurred');
-        }
-        process.exit(1);
+        handleError(error, signature);
       }
     });
 
   await program.parseAsync(process.argv);
 }
 
+/**
+ * Handle and display errors with user-friendly messages
+ */
+function handleError(error: unknown, signature?: string): never {
+  if (TxLensError.isTxLensError(error)) {
+    // Handle TxLensError with specific messages
+    console.error(chalk.red(`Error [${error.code}]:`), error.message);
+
+    // Provide helpful suggestions based on error code
+    switch (error.code) {
+      case ErrorCode.INVALID_SIGNATURE:
+        console.error(chalk.dim('\nTip: Transaction signatures are 88 characters in base58 format'));
+        console.error(chalk.dim('Example: 5VERv8NMvzbJMEkV8xnrLkEaWRtSz9CosKDYjCJjBRnbJLgp8uirBgmQpjKhoR4tjF3ZpRzrFmBV6UjKdiSZkQUW'));
+        break;
+
+      case ErrorCode.INVALID_RPC_URL:
+        console.error(chalk.dim('\nTip: RPC URL must be a valid HTTP/HTTPS URL'));
+        console.error(chalk.dim('Example: https://api.mainnet-beta.solana.com'));
+        break;
+
+      case ErrorCode.RPC_CONNECTION_FAILED:
+        console.error(chalk.dim('\nTip: Check your internet connection and RPC endpoint'));
+        console.error(chalk.dim('Try using a different RPC endpoint with --rpc flag'));
+        break;
+
+      case ErrorCode.TRANSACTION_NOT_FOUND:
+        console.error(chalk.dim('\nTip: Verify the transaction signature is correct'));
+        console.error(chalk.dim('Check the transaction on Solana Explorer: https://explorer.solana.com'));
+        break;
+
+      case ErrorCode.RPC_TIMEOUT:
+        console.error(chalk.dim('\nTip: The RPC endpoint is slow or unresponsive'));
+        console.error(chalk.dim('Try again or use a different RPC endpoint'));
+        break;
+
+      case ErrorCode.RPC_RATE_LIMITED:
+        console.error(chalk.dim('\nTip: You have exceeded the rate limit for this RPC endpoint'));
+        console.error(chalk.dim('Wait a moment and try again, or use a different endpoint'));
+        break;
+
+      case ErrorCode.JSON_SERIALIZATION_FAILED:
+        console.error(chalk.dim('\nTip: Try without --json flag for human-readable output'));
+        break;
+
+      default:
+        // Show details for other errors if available
+        if (error.details) {
+          console.error(chalk.dim('\nDetails:'), JSON.stringify(error.details, null, 2));
+        }
+    }
+  } else if (error instanceof Error) {
+    console.error(chalk.red('Error:'), error.message);
+  } else {
+    console.error(chalk.red('Error:'), 'An unknown error occurred');
+  }
+
+  process.exit(1);
+}
+
 // Run CLI
 main().catch((error) => {
-  console.error('Fatal error:', error);
-  process.exit(1);
+  handleError(error);
 });
