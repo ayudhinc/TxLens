@@ -8,16 +8,32 @@
   },
   "scripts": {
     "build": "tsc",
+    "build:watch": "tsc --watch",
     "start": "ts-node src/cli.ts",
     "dev": "ts-node src/cli.ts",
-    "prepublishOnly": "pnpm run build"
+    "clean": "rm -rf dist",
+    "prebuild": "pnpm run clean",
+    "prepublishOnly": "pnpm run build",
+    "typecheck": "tsc --noEmit",
+    "prepack": "pnpm run build",
+    "postinstall": "echo 'TxLens installed successfully! Run: txlens --help'"
   },
   "keywords": [
     "solana",
     "blockchain",
     "transaction",
     "decoder",
-    "cli"
+    "cli",
+    "solana-transaction",
+    "transaction-decoder",
+    "solana-cli",
+    "web3",
+    "crypto",
+    "defi",
+    "spl-token",
+    "transaction-explorer",
+    "blockchain-tools",
+    "developer-tools"
   ],
   "author": "Dushyant Kashyap <dushyant@ayudh.ai>",
   "license": "MIT",
