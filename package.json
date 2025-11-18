@@ -16,7 +16,11 @@
     "prepublishOnly": "pnpm run build",
     "typecheck": "tsc --noEmit",
     "prepack": "pnpm run build",
-    "postinstall": "echo 'TxLens installed successfully! Run: txlens --help'"
+    "postinstall": "echo 'TxLens installed successfully! Run: txlens --help'",
+    "test": "vitest --run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest --run --coverage",
+    "test:ui": "vitest --ui"
   },
   "keywords": [
     "solana",
@@ -47,14 +51,17 @@
   "homepage": "https://github.com/ayudhinc/TxLens#readme",
   "dependencies": {
     "@solana/web3.js": "^1.95.8",
-    "commander": "^12.1.0",
+    "bs58": "^6.0.0",
     "chalk": "^4.1.2",
-    "bs58": "^6.0.0"
+    "commander": "^12.1.0"
   },
   "devDependencies": {
     "@types/node": "^22.10.1",
+    "@vitest/coverage-v8": "4.0.10",
+    "@vitest/ui": "4.0.10",
+    "ts-node": "^10.9.2",
     "typescript": "^5.7.2",
-    "ts-node": "^10.9.2"
+    "vitest": "4.0.10"
   },
   "files": [
     "dist",
