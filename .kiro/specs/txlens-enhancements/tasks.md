@@ -9,7 +9,7 @@
   - _Requirements: 6.1, 6.5_
 
 - [ ] 2. Implement Metaplex decoder
-- [ ] 2.1 Create MetaplexDecoder class and basic structure
+- [x] 2.1 Create MetaplexDecoder class and basic structure
   - Create src/parser/decoders/MetaplexDecoder.ts file
   - Implement InstructionDecoder interface with canDecode() and decode() methods
   - Add Metaplex program IDs (Token Metadata, Candy Machine, Auction House) as constants

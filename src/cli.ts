@@ -5,6 +5,7 @@ import { RpcClient } from './rpc/RpcClient';
 import { TransactionParser } from './parser/TransactionParser';
 import { TokenProgramDecoder } from './parser/TokenProgramDecoder';
 import { SystemProgramDecoder } from './parser/SystemProgramDecoder';
+import { MetaplexDecoder } from './parser/decoders/MetaplexDecoder';
 import { HumanReadableFormatter } from './formatter/HumanReadableFormatter';
 import { JsonFormatter } from './formatter/JsonFormatter';
 import { TransactionController } from './controller/TransactionController';
@@ -93,8 +94,12 @@ async function main() {
         // Validate RPC connection
         await rpcClient.validateConnection();
 
-        // Create parser with decoders
-        const decoders = [new TokenProgramDecoder(), new SystemProgramDecoder()];
+        // Create parser with decoders (MetaplexDecoder has higher priority for NFT/Metaplex txs)
+        const decoders = [
+          new MetaplexDecoder(),
+          new TokenProgramDecoder(),
+          new SystemProgramDecoder(),
+        ];
         const parser = new TransactionParser(decoders);
 
         // Select formatter based on output format
@@ -189,7 +194,11 @@ async function main() {
 
         // Parse and score all transactions
         const rpcClient = new RpcClient(rpcEndpoint);
-        const decoders = [new TokenProgramDecoder(), new SystemProgramDecoder()];
+        const decoders = [
+          new MetaplexDecoder(),
+          new TokenProgramDecoder(),
+          new SystemProgramDecoder(),
+        ];
         const parser = new TransactionParser(decoders);
 
         const parsedTransactions = [];
@@ -340,8 +349,12 @@ async function main() {
         // Validate RPC connection
         await rpcClient.validateConnection();
 
-        // Create parser with decoders
-        const decoders = [new TokenProgramDecoder(), new SystemProgramDecoder()];
+        // Create parser with decoders (MetaplexDecoder has higher priority for NFT/Metaplex txs)
+        const decoders = [
+          new MetaplexDecoder(),
+          new TokenProgramDecoder(),
+          new SystemProgramDecoder(),
+        ];
         const parser = new TransactionParser(decoders);
 
         // Select formatter based on output format
